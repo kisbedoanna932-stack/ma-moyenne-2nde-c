@@ -1,7 +1,6 @@
 {
   "name": "Ma Moyenne – 2nde C",
   "short_name": "Ma Moyenne",
-  "description": "Calcul des moyennes trimestrielles avec coefficients.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
