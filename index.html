@@ -451,7 +451,10 @@ out.push(`
 }
 $("history").innerHTML=out.join("");
 }
-
+$("schoolYear").addEventListener("change",()=>{
+data.schoolYear=$("schoolYear").value.trim();
+save();
+});
 $("saveSchool").onclick=()=>{
 data.school=$("school").value.trim();
 save();
