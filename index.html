@@ -244,7 +244,11 @@ const old=JSON.parse(localStorage.getItem(key)||"null");
 function migrate(d){
 if(!d)return{school:"",terms:{"1":{},"2":{},"3":{}}};
 
-const r={school:d.school||"",terms:{"1":{},"2":{},"3":{}}};
+const r={
+school:d.school||"",
+schoolYear:d.schoolYear||"2026-2027",
+terms:{"1":{},"2":{},"3":{}}
+};
 const order=["math","pc","svt","fr","hg","ang","ecm","philo"];
 
 for(let t=1;t<=3;t++){
