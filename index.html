@@ -15,16 +15,17 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);font-family:Arial,sans-serif;color:var(--ink)}
-header{background:linear-gradient(135deg,#172033,#f97316);color:white;padding:24px 18px}
-header h1{margin:0 0 6px;font-size:25px}
+header{background:linear-gradient(135deg,#172033,#f97316);color:white;padding:26px 18px}
+header h1{margin:0 0 6px;font-size:27px}
 header p{margin:0;font-size:14px}
-main{max-width:760px;margin:auto;padding:16px}
-.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:15px;margin-bottom:14px}
+main{max-width:800px;margin:auto;padding:16px}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
 label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
 input{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;font-size:16px}
 .row{display:flex;gap:10px;align-items:end}
 .row>*{flex:1;min-width:0}
-button{border:0;border-radius:10px;padding:12px 14px;font-weight:bold;background:var(--o);color:white}
+button{border:0;border-radius:10px;padding:12px 14px;font-weight:bold;background:var(--o);color:white;cursor:pointer}
+button:active{transform:scale(.98)}
 .tabs{display:flex;gap:8px;margin-bottom:12px}
 .tabs button{flex:1}
 .tabs .active{background:#172033}
@@ -35,18 +36,36 @@ button{border:0;border-radius:10px;padding:12px 14px;font-weight:bold;background
 .notes{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .avg{margin-top:9px;display:flex;justify-content:space-between;color:var(--muted);font-size:14px}
 .weighted{margin-top:8px;padding:9px;background:#fff7ed;border-radius:9px;display:flex;justify-content:space-between;font-size:14px;color:#9a3412}
-.result{background:#172033;color:white;text-align:center;padding:18px;border-radius:14px}
-.result strong{display:block;font-size:36px;margin:8px}
-.small{font-size:12px;color:var(--muted);line-height:1.5}
+.result{background:#172033;color:white;text-align:center;padding:20px;border-radius:14px}
+.result strong{display:block;font-size:38px;margin:8px}
+.small{font-size:12px;color:var(--muted);line-height:1.6}
 h2{font-size:18px;margin:0 0 12px}
+h3{font-size:15px;margin:15px 0 8px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .stat{background:#f8fafc;border:1px solid var(--line);padding:13px;border-radius:12px}
-.stat strong{display:block;font-size:23px;margin-top:6px;color:#172033}
+.stat strong{display:block;font-size:22px;margin-top:6px;color:#172033}
 .stat span{font-size:12px;color:var(--muted)}
+.progress{height:12px;background:#e5e7eb;border-radius:20px;overflow:hidden;margin:12px 0}
+.progress div{height:100%;width:0;background:linear-gradient(90deg,#f97316,#fb923c);border-radius:20px;transition:width .3s}
+.rankrow{display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px solid var(--line);font-size:14px}
+.rankrow:last-child{border:0}
+.ranknum{color:var(--o);font-weight:bold;min-width:28px}
+.appreciation{background:#fff7ed;border-left:4px solid var(--o);padding:13px;border-radius:9px;line-height:1.5}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{flex:1;min-width:130px}
+.danger{background:#fee2e2;color:#991b1b}
+.secondary-btn{background:#172033}
 @media(max-width:420px){
 .row{display:block}
 .row>div{margin-bottom:10px}
 .tabs button{padding:10px 5px;font-size:12px}
+.result strong{font-size:33px}
+}
+@media print{
+body{background:white}
+header{background:#172033!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+button,.tabs{display:none!important}
+.panel{break-inside:avoid}
 }
 </style>
 </head>
@@ -54,7 +73,7 @@ h2{font-size:18px;margin:0 0 12px}
 <body>
 <header>
 <h1>Ma Moyenne</h1>
-<p>Mon bulletin scolaire • 2nde C</p>
+<p>Mon bulletin scolaire • Classe de 2nde C</p>
 </header>
 
 <main>
@@ -76,7 +95,7 @@ h2{font-size:18px;margin:0 0 12px}
 <button class="secondary" data-term="2">2e trimestre</button>
 <button class="secondary" data-term="3">3e trimestre</button>
 </div>
-<div class="small">Entre tes deux notes sur 20 pour chaque matière. Les coefficients sont corrigés.</div>
+<p class="small">Entre tes deux notes sur 20 pour chaque matière. Les coefficients sont ceux de ta classe.</p>
 </section>
 
 <section class="panel">
@@ -86,20 +105,25 @@ h2{font-size:18px;margin:0 0 12px}
 
 <section class="panel">
 <h2>Récapitulatif des calculs</h2>
-
 <div class="stats">
 <div class="stat">
-<span>Total des coefficients</span>
+<span>Total des coefficients utilisés</span>
 <strong id="totalCoeff">0 / 24</strong>
 </div>
-
 <div class="stat">
 <span>Total des notes pondérées</span>
 <strong id="totalWeighted">0</strong>
 </div>
+<div class="stat">
+<span>Matières calculées</span>
+<strong id="doneCount">0 / 7</strong>
 </div>
-
-<p class="small">Une note pondérée correspond à la moyenne de la matière multipliée par son coefficient.</p>
+<div class="stat">
+<span>Coefficient restant</span>
+<strong id="remainingCoeff">24</strong>
+</div>
+</div>
+<p class="small">Note pondérée = moyenne de la matière × coefficient.</p>
 </section>
 
 <section class="panel">
@@ -108,18 +132,50 @@ h2{font-size:18px;margin:0 0 12px}
 <strong id="general">— / 20</strong>
 <div id="count">Aucune matière calculée</div>
 </div>
-<p class="small">Moyenne générale = total des notes pondérées ÷ total des coefficients pris en compte.</p>
+<h3>Progression vers 20/20</h3>
+<div class="progress"><div id="progressBar"></div></div>
+<p class="small" id="progressText">En attente de tes notes.</p>
 </section>
 
 <section class="panel">
-<h2>Mon historique</h2>
+<h2>Mon appréciation automatique</h2>
+<div class="appreciation" id="appreciation">
+Entre tes notes pour obtenir une appréciation.
+</div>
+<div class="stats">
+<div class="stat">
+<span>Meilleure matière</span>
+<strong id="bestSubject" style="font-size:16px">—</strong>
+</div>
+<div class="stat">
+<span>Matière à renforcer</span>
+<strong id="weakSubject" style="font-size:16px">—</strong>
+</div>
+</div>
+</section>
+
+<section class="panel">
+<h2>Classement de mes matières</h2>
+<div id="ranking" class="small">Le classement apparaîtra lorsque tu auras des notes.</div>
+</section>
+
+<section class="panel">
+<h2>Mon historique des trimestres</h2>
 <div id="history" class="small"></div>
 </section>
 
 <section class="panel">
-<button id="export">Exporter mes résultats</button>
-<button id="reset" style="background:#fee2e2;color:#991b1b">Effacer les notes du trimestre</button>
-<p class="small">Les notes sont conservées dans le navigateur de cet appareil. Exporte une copie pour les sauvegarder.</p>
+<h2>Mon bulletin</h2>
+<div class="actions">
+<button id="print" class="secondary-btn">Imprimer le bulletin</button>
+<button id="export">Sauvegarder mes données</button>
+</div>
+<p class="small">Tu peux imprimer ton bulletin ou télécharger une copie de tes données pour les conserver.</p>
+</section>
+
+<section class="panel">
+<button id="reset" class="danger">Effacer les notes du trimestre</button>
+<p class="small">Cette action efface uniquement les notes du trimestre sélectionné.</p>
 </section>
 
 </main>
@@ -135,6 +191,7 @@ const subjects=[
 {id:"philo",name:"Philosophie",c:2}
 ];
 
+const TOTAL_COEFF=24;
 const key="maMoyenne2ndeC_v1";
 const old=JSON.parse(localStorage.getItem(key)||"null");
 
@@ -146,13 +203,11 @@ const order=["math","pc","svt","fr","hg","ang","ecm","philo"];
 
 for(let t=1;t<=3;t++){
 const ot=d.terms?.[t]||{};
-
 Object.keys(ot).forEach(k=>{
 const id=order[Number(k)];
 if(id&&id!=="ecm"&&subjects.some(s=>s.id===id))
 r.terms[t][id]=ot[k];
 });
-
 subjects.forEach(s=>{
 if(ot[s.id])r.terms[t][s.id]=ot[s.id];
 });
@@ -162,7 +217,6 @@ return r;
 
 let data=migrate(old);
 localStorage.setItem(key,JSON.stringify(data));
-
 let term="1";
 const $=id=>document.getElementById(id);
 
@@ -170,60 +224,67 @@ function save(){
 localStorage.setItem(key,JSON.stringify(data));
 }
 
-function render(){
+function getAverage(s){
+const n=data.terms[term][s.id]||{a:"",b:""};
+if(n.a===""||n.b==="")return null;
+return (Number(n.a)+Number(n.b))/2;
+}
 
+function getAppreciation(avg){
+if(avg===null)return "Entre tes deux notes dans les matières pour obtenir ton appréciation.";
+if(avg>=18)return "Excellent travail ! Tu fais preuve d'une très grande maîtrise. Continue ainsi !";
+if(avg>=16)return "Très bon travail ! Tes résultats sont remarquables. Poursuis tes efforts.";
+if(avg>=14)return "Bon travail ! Tu as de bons résultats. Continue à progresser.";
+if(avg>=12)return "Assez bien ! Tes résultats sont encourageants. Tu peux encore progresser.";
+if(avg>=10)return "Passable. Tu as la moyenne, mais tu dois renforcer tes efforts.";
+if(avg>=8)return "Insuffisant. Il faut davantage travailler et revoir les notions difficiles.";
+return "Résultats faibles. Ne te décourage pas : reprends les cours et entraîne-toi régulièrement.";
+}
+
+function render(){
 $("school").value=data.school||"";
 $("subjects").innerHTML="";
 
 let weightedTotal=0;
 let coeffTotal=0;
 let done=0;
+let results=[];
 
 subjects.forEach(s=>{
-
 const n=data.terms[term][s.id]||{a:"",b:""};
-
 const a=n.a===""?null:Number(n.a);
 const b=n.b===""?null:Number(n.b);
-
 const avg=a!==null&&b!==null?(a+b)/2:null;
-
 const weighted=avg!==null?avg*s.c:null;
 
 if(avg!==null){
 weightedTotal+=weighted;
 coeffTotal+=s.c;
 done++;
+results.push({name:s.name,avg,weighted,coeff:s.c});
 }
 
 const el=document.createElement("div");
 el.className="subject";
-
 el.innerHTML=`
 <div class="subjecttop">
 <span>${s.name}</span>
 <span class="coeff">Coef. ${s.c}</span>
 </div>
-
 <div class="notes">
 <div>
 <label>1ère note /20</label>
-<input type="number" min="0" max="20" step="0.25"
-inputmode="decimal" placeholder="Ex. 12" value="${n.a}">
+<input type="number" min="0" max="20" step="0.25" inputmode="decimal" placeholder="Ex. 12" value="${n.a}">
 </div>
-
 <div>
 <label>2ème note /20</label>
-<input type="number" min="0" max="20" step="0.25"
-inputmode="decimal" placeholder="Ex. 15" value="${n.b}">
+<input type="number" min="0" max="20" step="0.25" inputmode="decimal" placeholder="Ex. 15" value="${n.b}">
 </div>
 </div>
-
 <div class="avg">
 <span>Moyenne de la matière</span>
 <b>${avg===null?"—":avg.toFixed(2)+"/20"}</b>
 </div>
-
 <div class="weighted">
 <span>Note pondérée</span>
 <b>${weighted===null?"—":weighted.toFixed(2)}</b>
@@ -231,81 +292,71 @@ inputmode="decimal" placeholder="Ex. 15" value="${n.b}">
 `;
 
 el.querySelectorAll("input").forEach((inp,j)=>{
-
 inp.addEventListener("change",()=>{
-
 const v=inp.value;
-
-if(v!==""&&(Number(v)<0||Number(v)>20)){
-alert("Entre une note entre 0 et 20.");
+if(v!==""&&(!Number.isFinite(Number(v))||Number(v)<0||Number(v)>20)){
+alert("Entre une note comprise entre 0 et 20.");
 inp.value="";
 return;
 }
-
 data.terms[term][s.id]??={a:"",b:""};
-
 data.terms[term][s.id][j?"b":"a"]=v;
-
 save();
 render();
-
 });
-
 });
-
 $("subjects").appendChild(el);
-
 });
 
-// Récapitulatif
+const general=coeffTotal?weightedTotal/coeffTotal:null;
 
-$("totalCoeff").textContent=coeffTotal+" / 24";
-
+$("totalCoeff").textContent=coeffTotal+" / "+TOTAL_COEFF;
 $("totalWeighted").textContent=weightedTotal.toFixed(2);
+$("doneCount").textContent=done+" / 7";
+$("remainingCoeff").textContent=TOTAL_COEFF-coeffTotal;
+$("general").textContent=general===null?"— / 20":general.toFixed(2)+" / 20";
+$("count").textContent=done+" matière(s) calculée(s) sur 7";
 
-$("general").textContent=coeffTotal
-?(weightedTotal/coeffTotal).toFixed(2)+" / 20"
-:"— / 20";
+$("progressBar").style.width=(general===null?0:general/20*100)+"%";
+$("progressText").textContent=general===null
+?"En attente de tes notes."
+:"Tu as atteint "+(general/20*100).toFixed(1)+" % de la note maximale.";
 
-$("count").textContent=
-done+" matière(s) calculée(s) sur "+subjects.length;
+$("appreciation").textContent=getAppreciation(general);
+
+results.sort((a,b)=>b.avg-a.avg);
+$("bestSubject").textContent=results.length?results[0].name+" ("+results[0].avg.toFixed(2)+")":"—";
+$("weakSubject").textContent=results.length?results[results.length-1].name+" ("+results[results.length-1].avg.toFixed(2)+")":"—";
+
+$("ranking").innerHTML=results.length
+?results.map((r,i)=>`
+<div class="rankrow">
+<span><b class="ranknum">${i+1}.</b> ${r.name}</span>
+<b>${r.avg.toFixed(2)}/20</b>
+</div>`).join("")
+:"Le classement apparaîtra lorsque tu auras des notes.";
 
 renderHistory();
 }
 
 function renderHistory(){
-
 let out=[];
-
 for(let t=1;t<=3;t++){
-
-let w=0;
-let c=0;
-
+let w=0,c=0;
 subjects.forEach(s=>{
-
 const n=data.terms[t][s.id];
-
 if(n&&n.a!==""&&n.b!==""){
-
 w+=(Number(n.a)+Number(n.b))/2*s.c;
 c+=s.c;
-
 }
-
 });
-
 out.push(`
-<div style="padding:8px 0;border-bottom:1px solid #e5e7eb">
-<b>${t===1?"1er":t+"e"} trimestre :</b>
-${c?(w/c).toFixed(2)+"/20":"Pas encore calculé"}
-</div>
-`);
-
+<div class="rankrow">
+<span><b>${t===1?"1er":t+"e"} trimestre</b></span>
+<b>${c?(w/c).toFixed(2)+"/20":"Pas encore calculé"}</b>
+</div>`);
 }
-
 $("history").innerHTML=out.join("");
-
 }
 
 $("saveSchool").onclick=()=>{
@@ -315,56 +366,45 @@ $("schoolStatus").textContent="Établissement enregistré.";
 };
 
 $("tabs").querySelectorAll("button").forEach(b=>{
-
 b.onclick=()=>{
-
 term=b.dataset.term;
-
 $("tabs").querySelectorAll("button").forEach(x=>{
 x.className=x===b?"active":"secondary";
 });
-
 render();
-
 };
-
 });
 
 $("reset").onclick=()=>{
-
 if(confirm("Effacer toutes les notes de ce trimestre ?")){
-
 data.terms[term]={};
 save();
 render();
-
 }
-
 };
 
 $("export").onclick=()=>{
-
 const blob=new Blob(
 [JSON.stringify(data,null,2)],
 {type:"application/json"}
 );
-
 const url=URL.createObjectURL(blob);
 const a=document.createElement("a");
-
 a.href=url;
 a.download="mes-resultats-scolaires.json";
 a.click();
-
 URL.revokeObjectURL(url);
-
 };
 
-if("serviceWorker"in navigator&&location.protocol.startsWith("http"))
-addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+$("print").onclick=()=>window.print();
+
+if("serviceWorker"in navigator&&location.protocol.startsWith("http")){
+addEventListener("load",()=>{
+navigator.serviceWorker.register("./service-worker.js").catch(()=>{});
+});
+}
 
 render();
-
 </script>
 </body>
 </html>
