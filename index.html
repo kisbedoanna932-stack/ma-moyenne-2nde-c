@@ -1,4 +1,4 @@
-<!doctype html>
+o<!doctype html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
@@ -384,7 +384,50 @@ $("ranking").innerHTML=results.length
 
 renderHistory();
 }
+function updateAnnual(){
 
+let averages=[];
+
+for(let t=1;t<=3;t++){
+
+let weighted=0;
+let coeff=0;
+
+subjects.forEach(s=>{
+
+const n=data.terms[t][s.id];
+
+if(n && n.a!=="" && n.b!==""){
+
+weighted+=((Number(n.a)+Number(n.b))/2)*s.c;
+coeff+=s.c;
+
+}
+
+});
+
+const avg=coeff?weighted/coeff:null;
+
+$("annualT"+t).textContent=
+avg===null?"—":avg.toFixed(2)+"/20";
+
+if(avg!==null)averages.push(avg);
+
+}
+
+const annual=averages.length
+?averages.reduce((a,b)=>a+b,0)/averages.length
+:null;
+
+$("annualAverage").textContent=
+annual===null?"— / 20":annual.toFixed(2)+" / 20";
+
+$("annualAppreciation").textContent=
+annual===null
+?"En attente des résultats des trimestres."
+:getAppreciation(annual);
+
+}
 function renderHistory(){
 let out=[];
 for(let t=1;t<=3;t++){
